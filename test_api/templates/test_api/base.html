@@ -6,5 +6,12 @@
 </head>
 <body>
 
+<form action="{% url 'getform' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+
+    <button type="submit" >Добавить запись</button>
+
+</form>
 </body>
 </html>
