@@ -12,6 +12,10 @@ class TestAPIView(generics.ListAPIView):
     queryset = TempForms.objects.all()
     serializer_class = TempFormsSerializer
 
+    def post(self):
+        return print('dgsds')
+        print('gdhfdh')
+
 class TestView(View):
     #form_class = MyForm
     #initial = {'key': 'value'}
@@ -23,9 +27,9 @@ class TestView(View):
             'form': form
         }
         return render(request, 'test_api/base.html', context)
-    def post(self,request):
-
-        name = self.request.POST['name']
-        listRes = dict(map(lambda x:x.split('='), name.split('&'))) #dict(name.split("="))
-        print(listRes[0])
+    # def post(self,request):
+    #
+    #     name = self.request.POST['name']
+    #     listRes = dict(map(lambda x:x.split('='), name.split('&'))) #dict(name.split("="))
+    #     print(self.request.POST)
     #return render(request, self.template_name, {'form': form})
