@@ -20,5 +20,5 @@ from test_api.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/get_form/', TestAPIView.as_view(), name= 'getform'),
+    path('api/get_form/', TestView.as_view(), name= 'getform'),
 ]

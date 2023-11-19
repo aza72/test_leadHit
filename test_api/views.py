@@ -1,35 +1,46 @@
+import re
+
+from django.db.migrations import serializer
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import render
 from django.views import View
-from django.views.generic import ListView
-from rest_framework import generics
-import json
-from .forms import PostForm
-from .models import *
-from .serializers import *
+from django.views.decorators.csrf import csrf_protect
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from test_api.models import TempForms
+from test_api.serializers import TempFormsSerializer
 
 
-class TestAPIView(generics.ListAPIView):
-    queryset = TempForms.objects.all()
-    serializer_class = TempFormsSerializer
+class TestView(APIView):
 
-    def post(self):
-        return print('dgsds')
-        print('gdhfdh')
+    def post(self,request):
 
-class TestView(View):
-    #form_class = MyForm
-    #initial = {'key': 'value'}
-    #template_name = 'base.html'
+        #d = request.POST
+        data = check_form(request.GET)
+        #data = TempForms.objects.all()
+        serializer = TempFormsSerializer(data, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
 
-    def get(self,request):
-        form=PostForm(request.GET)
-        context = {
-            'form': form
-        }
-        return render(request, 'test_api/base.html', context)
-    # def post(self,request):
-    #
-    #     name = self.request.POST['name']
-    #     listRes = dict(map(lambda x:x.split('='), name.split('&'))) #dict(name.split("="))
-    #     print(self.request.POST)
-    #return render(request, self.template_name, {'form': form})
+
+def check_type(data):
+    test = {'date': r'^\d\d\.\d\d\.\d{4}$',
+            'phone': r'^(\+79\d{9})$',
+            'email': r'^\S+@\w+.\w{2,4}$',
+            }
+
+    for types, rex in test.items():
+        if re.fullmatch(rex, data):
+            #print(types)
+            return types
+
+    return 'text'
+def check_form(data):
+    res = {}
+    data = data.dict()
+    for k, v in data.items():
+        res[k] = check_type(v)
+        print(v)
+    return res
+
