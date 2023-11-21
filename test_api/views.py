@@ -1,7 +1,11 @@
 import re
 from urllib.parse import urlencode
+
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from test_api.models import TempForms
 from test_api.serializers import TempFormsSerializer
 
 
@@ -11,9 +15,22 @@ class TestView(APIView):
         d = urlencode(request.GET)
         p = dict(map(lambda x: x.split('='), d.split('&')))
         data = check_form(p)
-        serializer = TempFormsSerializer(data, many=True)
-        print(serializer.data)
-        return Response(serializer.data)
+        form_search_cond = Q()  # django.db.models.Q
+        for k, v in data.items():
+            print(k)
+            print(v)
+            #form_search_cond &= Q(**{f'sample__{k}': v})
+            form_search_cond.add(Q(name_field=k) & Q(name_type=v), Q.OR)
+        print(form_search_cond)
+        template = TempForms.objects.filter(form_search_cond)
+
+        if template:
+            serializer = TempFormsSerializer(template, many=True)
+            print(serializer.data)
+            print(template)
+            return Response(serializer.data)
+        else:
+            return Response(data)
 
 
 def check_type(data):
