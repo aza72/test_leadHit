@@ -1,11 +1,11 @@
 import re
 from urllib.parse import urlencode
 
-from django.db.models import Q
+from django.db.models import Q, Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from test_api.models import TempForms
+from test_api.models import TempForms, NameTemp
 from test_api.serializers import TempFormsSerializer
 
 
@@ -23,11 +23,15 @@ class TestView(APIView):
             form_search_cond.add(Q(name_field=k) & Q(name_type=v), Q.OR)
         print(form_search_cond)
         template = TempForms.objects.filter(form_search_cond)
+        cont = template.filter()
+        for p in template:
+            c = TempForms.objects.filter(name_temp=p.name_temp).count()
+            print(c)
 
         if template:
             serializer = TempFormsSerializer(template, many=True)
-            print(serializer.data)
-            print(template)
+            #print(serializer.data)
+            #print(template)
             return Response(serializer.data)
         else:
             return Response(data)
