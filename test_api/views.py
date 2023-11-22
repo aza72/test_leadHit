@@ -1,7 +1,10 @@
 import re
 from urllib.parse import urlencode
 
+from django.core import serializers
 from django.db.models import Q, Count
+from django.forms import model_to_dict
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -23,16 +26,26 @@ class TestView(APIView):
             form_search_cond.add(Q(name_field=k) & Q(name_type=v), Q.OR)
         print(form_search_cond)
         template = TempForms.objects.filter(form_search_cond)
-        cont = template.filter()
+        cont = []
         for p in template:
             c = TempForms.objects.filter(name_temp=p.name_temp).count()
-            print(c)
-
+            d = template.filter(name_temp=p.name_temp).count()
+            if d>=c:
+                cont.append(p.name_temp)
+                v=set(cont)
+                print(cont)
+                print(v)
+            #print(d)
+        x=template.filter(name_temp__name=v)
+        print(x)
         if template:
-            serializer = TempFormsSerializer(template, many=True)
+            #x=model_to_dict(v)
+            serializer = TempFormsSerializer(x, many=True)
             #print(serializer.data)
             #print(template)
-            return Response(serializer.data)
+            #return Response(serializer.data)
+            #data = serializers.serialize('json', v, fields=('name_temp',))
+            return Response(serializer)
         else:
             return Response(data)
 
