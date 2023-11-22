@@ -3,7 +3,9 @@ from .models import *
 
 
 class TempFormsSerializer(serializers.ModelSerializer):
-    name_temp = serializers.CharField()
+    #name_temp = serializers.CharField()
     class Meta:
-        model = TempForms
-        fields = ('name_temp', 'name_field', 'name_type')
+        model = NameTemp
+        #TempForms
+        fields = ('name',)
+        #('name_temp', 'name_field', 'name_type')

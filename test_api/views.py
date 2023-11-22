@@ -1,13 +1,8 @@
 import re
 from urllib.parse import urlencode
-
-from django.core import serializers
-from django.db.models import Q, Count
-from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from test_api.models import TempForms, NameTemp
 from test_api.serializers import TempFormsSerializer
 
@@ -18,34 +13,27 @@ class TestView(APIView):
         d = urlencode(request.GET)
         p = dict(map(lambda x: x.split('='), d.split('&')))
         data = check_form(p)
-        form_search_cond = Q()  # django.db.models.Q
+        form_search_cond = Q()
         for k, v in data.items():
-            print(k)
-            print(v)
             #form_search_cond &= Q(**{f'sample__{k}': v})
             form_search_cond.add(Q(name_field=k) & Q(name_type=v), Q.OR)
-        print(form_search_cond)
-        template = TempForms.objects.filter(form_search_cond)
+        #print(form_search_cond)
+        template = TempForms.objects.filter(form_search_cond).select_related('name_temp')
         cont = []
-        for p in template:
-            c = TempForms.objects.filter(name_temp=p.name_temp).count()
-            d = template.filter(name_temp=p.name_temp).count()
-            if d>=c:
-                cont.append(p.name_temp)
-                v=set(cont)
-                print(cont)
-                print(v)
-            #print(d)
-        x=template.filter(name_temp__name=v)
-        print(x)
         if template:
-            #x=model_to_dict(v)
-            serializer = TempFormsSerializer(x, many=True)
-            #print(serializer.data)
-            #print(template)
-            #return Response(serializer.data)
-            #data = serializers.serialize('json', v, fields=('name_temp',))
-            return Response(serializer)
+            for p in template:
+                c = TempForms.objects.filter(name_temp=p.name_temp).count()
+                d = template.filter(name_temp=p.name_temp).count()
+                if d>=c:
+                    cont.append(p.name_temp)
+                    #v=set(cont)
+                    cont = list(set(cont))
+
+
+        if cont:
+            #x = NameTemp.objects.filter(name__in=cont)
+            serializer = TempFormsSerializer(cont, many=True)
+            return Response(serializer.data)
         else:
             return Response(data)
 
@@ -58,7 +46,7 @@ def check_type(data):
 
     for types, rex in test.items():
         if re.fullmatch(rex, data):
-            print(types)
+            #print(types)
             return types
 
     return 'text'
@@ -69,7 +57,7 @@ def check_form(data):
     #print(data)
     for k, v in data.items():
         #v = urlencode(v)
-        print(v)
+        #print(v)
         res[k] = check_type(v)
         #print(v)
     return res
