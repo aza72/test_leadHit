@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from test_api.models import TempForms, NameTemp
+from test_api.models import TempForms
 from test_api.serializers import TempFormsSerializer
 
 
@@ -15,18 +15,15 @@ class TestView(APIView):
         data = check_form(p)
         form_search_cond = Q()
         for k, v in data.items():
-            #form_search_cond &= Q(**{f'sample__{k}': v})
             form_search_cond.add(Q(name_field=k) & Q(name_type=v), Q.OR)
-        #print(form_search_cond)
         template = TempForms.objects.filter(form_search_cond).select_related('name_temp')
-        cont = []
         if template:
+            cont=[]
             for p in template:
                 c = TempForms.objects.filter(name_temp=p.name_temp).count()
                 d = template.filter(name_temp=p.name_temp).count()
                 if d>=c:
                     cont.append(p.name_temp)
-                    #v=set(cont)
                     cont = list(set(cont))
 
 
@@ -46,19 +43,12 @@ def check_type(data):
 
     for types, rex in test.items():
         if re.fullmatch(rex, data):
-            #print(types)
             return types
 
     return 'text'
 def check_form(data):
-    #print(data)
     res = {}
-    #data = data.dict()
-    #print(data)
     for k, v in data.items():
-        #v = urlencode(v)
-        #print(v)
         res[k] = check_type(v)
-        #print(v)
     return res
 
