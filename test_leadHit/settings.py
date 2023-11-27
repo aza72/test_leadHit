@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'test_api',
     'rest_framework',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -127,4 +128,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-test_api.my_test_script.post_test()
+#test_api.my_test_script.post_test()
