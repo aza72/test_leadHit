@@ -12,13 +12,17 @@ class TestView(APIView):
     def post(self,request):
         d = urlencode(request.GET)
         p = dict(map(lambda x: x.split('='), d.split('&')))
+        #p=request.GET
+        print(p)
+
         data = check_form(p)
         form_search_cond = Q()
         for k, v in data.items():
             form_search_cond.add(Q(name_field=k) & Q(name_type=v), Q.OR)
         template = TempForms.objects.filter(form_search_cond).select_related('name_temp')
+        cont = []
         if template:
-            cont=[]
+
             for p in template:
                 c = TempForms.objects.filter(name_temp=p.name_temp).count()
                 d = template.filter(name_temp=p.name_temp).count()
