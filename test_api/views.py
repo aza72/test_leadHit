@@ -10,10 +10,15 @@ from test_api.serializers import TempFormsSerializer
 class TestView(APIView):
 
     def post(self,request):
-        d = urlencode(request.GET)
-        p = dict(map(lambda x: x.split('='), d.split('&')))
-        #p=request.GET
-        print(p)
+        if request.GET:
+            d = urlencode(request.GET)
+            p = dict(map(lambda x: x.split('='), d.split('&')))
+            print('get')
+
+        if request.POST:
+            p = request.POST
+            print('post')
+
 
         data = check_form(p)
         form_search_cond = Q()
